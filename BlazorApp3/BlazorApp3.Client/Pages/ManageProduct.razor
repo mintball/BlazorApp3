@@ -1,0 +1,80 @@
+﻿@page "/manage-product"
+@page "/manage-product/{Id:int}"
+@rendermode InteractiveAuto
+<h3>ManageProduct</h3>
+
+<div class="container">
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                </div>
+                <div class="card-body">
+                    <EditForm Model="ProductModel" OnValidSubmit="HandleSave" >
+                        <DataAnnotationsValidator />
+                        @* <ValidationSummary /> *@
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <InputText class="form-control" @bind-Value="ProductModel.Name" />
+                            <ValidationMessage For="()=> ProductModel.Name"></ValidationMessage>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Price</label>
+                            <InputNumber class="form-control" @bind-Value="ProductModel.Quality" />
+                            <ValidationMessage For="()=> ProductModel.Quality"></ValidationMessage>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Save</button>
+
+                    </EditForm>
+
+                </div>
+
+                <div class="card-footer">
+                    ID = @ReturnProduct.Id
+                    <br />
+                    Name: @ReturnProduct.Name
+                    <br />
+                    Quality: @ReturnProduct.Quality
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    [SupplyParameterFromForm]
+    public Product ProductModel { get; set; } = new();
+
+    [Parameter]
+    public int Id { get; set; }
+
+    public Product ReturnProduct = new();
+
+    private async Task HandleSave()
+    {
+
+        if(ProductModel.Id > 0)
+        {
+            ReturnProduct = await ProductService.UpdateProductAsync(ProductModel);
+            return;
+        }
+
+        ReturnProduct = await ProductService.AddProductAsync(ProductModel);
+
+        // await JSRuntime.InvokeVoidAsync("alert", $"Id : {ReturnProduct.Id}{Environment.NewLine} Name:{ReturnProduct.Name}{Environment.NewLine}  Qualtity:{ReturnProduct.Quality}{Environment.NewLine}  Product Added Successfully");
+
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id > 0)
+        {
+            ProductModel = await ProductService.GetProductByIdAsync(Id);
+        }
+    }
+
+}

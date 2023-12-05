@@ -1,0 +1,109 @@
+﻿@page "/productlist"
+@rendermode InteractiveAuto
+
+<h3>ProductList</h3>
+
+<div class="container">
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    Product Lists
+                    <button class="btn btn-primary float-end" @onclick="NavigationToAddProductPage">Add New</button>
+
+                </div>
+                @if (products.Count > 0)
+                {
+
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Product Id</th>
+                                    <th>Product Name</th>
+                                    <th>Product Quality</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            @foreach (var item in products)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.Name</td>
+                                    <td>@item.Quality</td>
+                                    <td>
+                                        <div class="hstack gap-2">
+                                            <button class="btn  btn-info btn-sm" @onclick="()=>Edit(item)">Edit</button>
+                                            <button class="btn  btn-danger btn-sm"  @onclick="()=>Delete(item.Id)">Delete</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+
+                }
+                else
+                {
+
+                    <div class="alert alert-info"> No product found</div>
+                }
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Product> products { get; set; } = new();
+
+
+    private async Task LoadProduct()
+    {
+        var loadProducts = await ProductService.GetAllProductAsync();
+
+        if (loadProducts != null)
+        {
+            // Clear existing items and add new ones
+            products.Clear();
+            products.AddRange(loadProducts);
+
+        }
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProduct();
+    }
+
+    private void NavigationToAddProductPage()
+    {
+        NavigationManager.NavigateTo("manage-product", false);
+
+    }
+
+    private void Edit(Product model)
+    {
+        NavigationManager.NavigateTo($"manage-product/{model.Id}", false);
+
+    }
+
+    private async void Delete(int id)
+    {
+        var deleteProduct = await ProductService.DeleteProductAsync(id);
+
+        if (deleteProduct != null)
+        {
+            await LoadProduct();
+        }
+
+    }
+
+
+
+}
